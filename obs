@@ -1,0 +1,63 @@
+/* === index.html === */
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Der Dümmste fliegt - Overlay</title>
+  <style>
+    body {
+      margin: 0;
+      background: transparent;
+      font-family: sans-serif;
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 20px;
+      gap: 16px;
+    }
+    .player {
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 10px 16px;
+      border-radius: 12px;
+      min-width: 120px;
+      text-align: center;
+      font-size: 1.2em;
+    }
+    .hearts {
+      margin-top: 5px;
+      font-size: 1.5em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="overlay"></div>
+
+  <script>
+    const overlay = document.getElementById("overlay");
+    const channel = new BroadcastChannel("overlay_channel");
+    let state = Array.from({ length: 8 }, (_, i) => ({ name: `Spieler ${i+1}`, lives: 3 }));
+
+    function render() {
+      overlay.innerHTML = "";
+      state.forEach((player, idx) => {
+        const div = document.createElement("div");
+        div.className = "player";
+        const hearts = "❤️".repeat(player.lives) + "⚫".repeat(3 - player.lives);
+        div.innerHTML = `<strong>${player.name}</strong><div class="hearts">${hearts}</div>`;
+        overlay.appendChild(div);
+      });
+    }
+
+    channel.onmessage = (e) => {
+      state = e.data;
+      render();
+    };
+
+    render();
+  </script>
+</body>
+</html>
