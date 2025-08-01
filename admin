@@ -1,0 +1,88 @@
+/* === admin.html === */
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #111;
+      color: white;
+    }
+    .player {
+      background: #222;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+    input {
+      margin-right: 10px;
+    }
+    button {
+      margin-right: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Admin Panel</h1>
+  <div id="admin"></div>
+
+  <script>
+    const admin = document.getElementById("admin");
+    const channel = new BroadcastChannel("overlay_channel");
+    let state = Array.from({ length: 8 }, (_, i) => ({ name: `Spieler ${i+1}`, lives: 3 }));
+
+    function sendUpdate() {
+      channel.postMessage(state);
+    }
+
+    function render() {
+      admin.innerHTML = "";
+      state.forEach((player, idx) => {
+        const div = document.createElement("div");
+        div.className = "player";
+
+        const nameInput = document.createElement("input");
+        nameInput.value = player.name;
+        nameInput.oninput = (e) => {
+          state[idx].name = e.target.value;
+          sendUpdate();
+        };
+
+        const minus = document.createElement("button");
+        minus.textContent = "-1 ❤️";
+        minus.onclick = () => {
+          if (state[idx].lives > 0) state[idx].lives--;
+          sendUpdate();
+          render();
+        };
+
+        const plus = document.createElement("button");
+        plus.textContent = "+1 ❤️";
+        plus.onclick = () => {
+          if (state[idx].lives < 3) state[idx].lives++;
+          sendUpdate();
+          render();
+        };
+
+        const reset = document.createElement("button");
+        reset.textContent = "Reset";
+        reset.onclick = () => {
+          state[idx].lives = 3;
+          sendUpdate();
+          render();
+        };
+
+        div.append(nameInput, minus, plus, reset);
+        admin.appendChild(div);
+      });
+    }
+
+    render();
+    sendUpdate();
+  </script>
+</body>
+</html>
